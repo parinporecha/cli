@@ -130,3 +130,15 @@ class TestAutoContentTypeAndAcceptHeaders:
         env = MockEnvironment(stdin_isatty=True, stdout_isatty=False)
         r = http('--print=h', 'GET', httpbin + '/get', env=env)
         assert HTTP_OK in r
+
+
+def test_json_content_type_with_single_header(httpbin):
+    """
+    Test that Content-Type: application/json is set when a single header is present.
+    https://github.com/httpie/cli/issues/1640
+    """
+    r = http('--print=H', 'POST', httpbin + '/post', 'header1: xyz', 'x=1')
+    assert 'Content-Type: application/json' in r
+    # Verify it matches behavior with multiple headers
+    r2 = http('--print=H', 'POST', httpbin + '/post', 'header1: xyz', 'header2: abc', 'x=1')
+    assert 'Content-Type: application/json' in r2
